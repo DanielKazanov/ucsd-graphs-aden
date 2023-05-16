@@ -8,8 +8,13 @@
 package roadgraph;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -34,6 +39,9 @@ public class MapGraph {
 	public MapGraph()
 	{
 		// TODO: Implement in this constructor
+		numVertices = 0;
+		numEdges = 0;
+		vertices = new HashMap<GeographicPoint, MapNode>();
 	}
 	
 	/**
@@ -43,7 +51,7 @@ public class MapGraph {
 	public int getNumVertices()
 	{
 		//TODO: Implement this method
-		return 0;
+		return numVertices;
 	}
 	
 	/**
@@ -53,7 +61,7 @@ public class MapGraph {
 	public Set<GeographicPoint> getVertices()
 	{
 		//TODO: Implement this method
-		return null;
+		return vertices.keySet();
 	}
 	
 	/**
@@ -63,7 +71,7 @@ public class MapGraph {
 	public int getNumEdges()
 	{
 		//TODO: Implement this method.
-		return 0;
+		return numEdges;
 	}
 
 	
@@ -78,7 +86,13 @@ public class MapGraph {
 	public boolean addVertex(GeographicPoint location)
 	{
 		// TODO: Implement this method
-		return false;
+		if (vertices.containsKey(location) || location == null) {
+			return false;
+		}
+		
+		vertices.put(location, new MapNode());
+		numVertices++;
+		return true;
 	}
 	
 	/**
@@ -99,7 +113,16 @@ public class MapGraph {
 			String roadType, double length) throws IllegalArgumentException {
 
 		//TODO: Implement this method
+	    if (vertices.get(from) == null || vertices.get(to) == null) {
+	    	throw new IllegalArgumentException("Point(s) have not already been added as nodes to the graph.");
+	    }
 		
+		if (from == null || to == null || roadName == null || roadType == null || length < 0) {
+			 throw new IllegalArgumentException("Argument(s) are/is null.");
+		}
+		
+	    vertices.get(from).addEdge(to, roadName, roadType, length);
+	    numEdges++;
 	}
 	
 	/** Find the path from start to goal using breadth first search - without MapApp.
@@ -135,7 +158,55 @@ public class MapGraph {
 		// located in a helper method.
 		//nodeSearched.accept(next.getLocation());
 
+		Map<GeographicPoint, GeographicPoint> parentHashMap = new HashMap<>();
+	    Set<GeographicPoint> visitedNodes = new HashSet<>();
+	    visitedNodes.add(start);
+		Queue<GeographicPoint> myQ = new LinkedList<GeographicPoint>();
+	    myQ.add(start);
+	    
+	    while (!myQ.isEmpty()) {
+	    	GeographicPoint currentNode = myQ.poll();
+	    	nodeSearched.accept(currentNode);
+	    	
+	    	if (currentNode.equals(goal)) {
+	    		return path(start, goal, parentHashMap);
+	    	}
+	    	
+	        for (GeographicPoint neighborPoint : vertices.get(currentNode).getNeighborPoints()) {
+	            if (!visitedNodes.contains(neighborPoint)) {
+	                parentHashMap.put(neighborPoint, currentNode);
+	                visitedNodes.add(neighborPoint);
+	            	myQ.add(neighborPoint);
+	            }
+	        }
+	    }
+		
 		return null;
+	}
+	
+	/**
+	 * Creates a path from start to goal.
+	 * 
+	 * @param start the start
+	 * @param goal the goal
+	 * @param parentHashMap the parent hash map
+	 * @return the path
+	 */
+	public List<GeographicPoint> path(GeographicPoint start, GeographicPoint goal, Map<GeographicPoint, GeographicPoint> parentHashMap) {
+	    List<GeographicPoint> path = new ArrayList<GeographicPoint>();
+	    GeographicPoint currentNode = goal;
+	    
+	    while (currentNode != null) {
+	        path.add(0, currentNode);
+	        
+	        if (currentNode.equals(start)) {
+	            break;
+	        }
+	        
+	        currentNode = parentHashMap.get(currentNode);
+	    }
+	    
+	    return path;
 	}
 	
 	// DO NOT CODE ANYTHING BELOW THIS LINE UNTIL PART2
