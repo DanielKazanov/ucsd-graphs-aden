@@ -160,8 +160,8 @@ public class MapGraph {
 		//nodeSearched.accept(next.getLocation());
 
 		Map<GeographicPoint, GeographicPoint> parentHashMap = new HashMap<>();
-	    Set<GeographicPoint> visitedNodes = new HashSet<>();
-	    visitedNodes.add(start);
+	    Set<GeographicPoint> visited = new HashSet<>();
+	    visited.add(start);
 		Queue<GeographicPoint> myQ = new LinkedList<GeographicPoint>();
 	    myQ.add(start);
 	    
@@ -174,9 +174,9 @@ public class MapGraph {
 	    	}
 	    	
 	        for (GeographicPoint neighborPoint : vertices.get(currentNode).getNeighborPoints()) {
-	            if (!visitedNodes.contains(neighborPoint)) {
+	            if (!visited.contains(neighborPoint)) {
 	                parentHashMap.put(neighborPoint, currentNode);
-	                visitedNodes.add(neighborPoint);
+	                visited.add(neighborPoint);
 	            	myQ.add(neighborPoint);
 	            }
 	        }
