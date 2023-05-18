@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -244,7 +245,62 @@ public class MapGraph {
 		// located in a helper method.
 		//nodeSearched.accept(next.getLocation());
 		
+		HashMap<GeographicPoint, GeographicPoint> parentMap = new HashMap<>();
+	    Set<GeographicPoint> visited = new HashSet<>();
+	    HashMap<GeographicPoint, Double> distToNode = new HashMap<>();
+	    Queue<QueueElement> queue = new PriorityQueue<>();
+	    
+	    for (GeographicPoint n : vertices.keySet()) {
+	    	distToNode.put(n, Double.POSITIVE_INFINITY);
+	    }
+	    
+	    distToNode.put(start, 0.0);
+	    queue.add(new QueueElement(start, 0.0));
+	    
+	    while (!queue.isEmpty()) {
+	    	QueueElement element = queue.poll();
+	    	GeographicPoint curr = element.getPoint();
+	    	
+	    	if (!visited.contains(curr)) {
+	    		visited.add(curr);
+	    		nodeSearched.accept(curr);
+	    		
+    		    if (curr.equals(goal)) {
+    		    	return path(start, goal, parentMap);
+                }
+    		    
+    		    enqueue(curr, parentMap, visited, distToNode, queue);
+	    	}
+	    }
+		
 		return null;
+	}
+	
+	/**
+	 * Completes the enqueue for Dijkstra algorithm.
+	 * 
+	 * @param curr the current node
+	 * @param parentMap the parent map
+	 * @param visited the visited nodes
+	 * @param distToNode the distance to node
+	 * @param queue the queue
+	 */
+	public void enqueue(GeographicPoint curr, HashMap<GeographicPoint, GeographicPoint> parentMap, Set<GeographicPoint> visited, HashMap<GeographicPoint, Double> distToNode, Queue<QueueElement> queue) {
+		if (vertices.get(curr).getNeighborPoints().size() == 0) {
+			return;
+		}
+		
+		for (GeographicPoint n : vertices.get(curr).getNeighborPoints()) {
+             if (!visited.contains(n)) {
+                 double distToNext = distToNode.get(curr) + vertices.get(curr).getEdge(n).getRoadLength();
+                 
+                 if (distToNext < distToNode.get(n)) {
+                     parentMap.put(n, curr);
+                     queue.add(new QueueElement(n, distToNext));
+                     distToNode.put(n, distToNext);
+                 }
+             }
+         }
 	}
 
 	/** Find the path from start to goal using A-Star search - without MapApp.
