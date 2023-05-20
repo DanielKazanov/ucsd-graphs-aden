@@ -335,10 +335,63 @@ public class MapGraph {
 		// located in a helper method.
 		//nodeSearched.accept(next.getLocation());
 		
+		HashMap<GeographicPoint, GeographicPoint> parentMap = new HashMap<>();
+	    Set<GeographicPoint> visited = new HashSet<>();
+	    HashMap<GeographicPoint, Double> distToNode = new HashMap<>();
+	    Queue<QueueElement> queue = new PriorityQueue<>();
+	    
+	    for (GeographicPoint n : vertices.keySet()) {
+	    	distToNode.put(n, Double.POSITIVE_INFINITY);
+	    }
+	    
+	    distToNode.put(start, 0.0);
+	    queue.add(new QueueElement(start, 0.0, goal));
+	    
+	    while (!queue.isEmpty()) {
+	    	QueueElement element = queue.poll();
+	    	GeographicPoint curr = element.getPoint();
+	    	
+	    	if (!visited.contains(curr)) {
+	    		visited.add(curr);
+	    		nodeSearched.accept(curr);
+	    		
+    		    if (curr.equals(goal)) {
+    		    	return path(start, goal, parentMap);
+                }
+    		    
+    		    enqueueAStar(curr, parentMap, visited, distToNode, queue, goal);
+	    	}
+	    }
+		
 		return null;
 	}
 
-	
+	/**
+	 * Completes the enqueue for aStar algorithm.
+	 * 
+	 * @param curr the current node
+	 * @param parentMap the parent map
+	 * @param visited the visited nodes
+	 * @param distToNode the distance to node
+	 * @param queue the queue
+	 */
+	public void enqueueAStar(GeographicPoint curr, HashMap<GeographicPoint, GeographicPoint> parentMap, Set<GeographicPoint> visited, HashMap<GeographicPoint, Double> distToNode, Queue<QueueElement> queue, GeographicPoint goal) {
+		if (vertices.get(curr).getNeighborPoints().size() == 0) {
+			return;
+		}
+		
+		for (GeographicPoint n : vertices.get(curr).getNeighborPoints()) {
+             if (!visited.contains(n)) {
+                 double distToNext = distToNode.get(curr) + vertices.get(curr).getEdge(n).getRoadLength() + n.distance(goal);
+                 
+                 if (distToNext < distToNode.get(n)) {
+                     parentMap.put(n, curr);
+                     queue.add(new QueueElement(n, distToNext, goal));
+                     distToNode.put(n, distToNext);
+                 }
+             }
+         }
+	}
 	
 	public static void main(String[] args)
 	{

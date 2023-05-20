@@ -13,6 +13,7 @@ public class QueueElement implements Comparable<QueueElement> {
 	
 	private GeographicPoint point;
     private double distFromStart;   
+    private Double priorityDistance;
     
     /** Constructor for Dijsktra search
      * @param pt - current point
@@ -22,6 +23,18 @@ public class QueueElement implements Comparable<QueueElement> {
     {
     	this.point = pt;
     	this.distFromStart = d1;
+    	this.priorityDistance = d1;
+    }
+    
+    /** Constructor for aStar search
+     * @param pt - current point
+     * @param d1 - distance from start to this pt on current path
+     */
+    public QueueElement(GeographicPoint pt, double d1, GeographicPoint goal) 
+    {
+    	this.point = pt;
+    	this.distFromStart = d1;
+    	this.priorityDistance = d1 + pt.distance(goal);
     }
     
     /** gets the current point
@@ -46,7 +59,15 @@ public class QueueElement implements Comparable<QueueElement> {
      */
     public int compareTo(QueueElement o )
     {
-    	return Double.compare(this.distFromStart,o.getDistFromStart());
+//    	return Double.compare(this.distFromStart,o.getDistFromStart());
+    	return Double.compare(priorityDistance,o.getPriorityDistance()); // for aStar algorithm
+    }
+  
+    /** gets the priority distance
+     * @return priorityDistance
+     */
+    public Double getPriorityDistance() {
+    	return this.priorityDistance;
     }
 
 }
