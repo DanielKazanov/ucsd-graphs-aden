@@ -44,6 +44,10 @@ public class GeographicPoint extends Double {
     {
     	return "Lat: " + getX() + ", Lon: " + getY();
     }
+    
+    public String printPoint() {
+    	return( String.format("%s,%s",getX(),getY()));
+    }
 	
 	
 }

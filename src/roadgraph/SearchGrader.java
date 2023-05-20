@@ -22,7 +22,7 @@ public class SearchGrader implements Runnable {
     public int correct;
 
     private static final int TESTS = 12;
-    
+
     // SET THIS TO TRUE IF YOU NEED TO USE THE DEBUGGER!!!!
     private static final boolean DEBUG = false;
     

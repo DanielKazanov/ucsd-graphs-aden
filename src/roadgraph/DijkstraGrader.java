@@ -94,7 +94,11 @@ public class DijkstraGrader implements Runnable {
     public void judge(int i, MapGraph result, CorrectAnswer corr, GeographicPoint start, GeographicPoint end) {
         // Correct if paths are same length and have the same elements
         feedback += appendFeedback(i, "Running Dijkstra's algorithm from (" + start.getX() + ", " + start.getY() + ") to (" + end.getX() + ", " + end.getY() + ")");
-        List<GeographicPoint> path = result.dijkstra(start, end);
+        PointTracker pt = new PointTracker();
+        Consumer<geography.GeographicPoint> nodeAccepter = pt::acceptPoint;
+        List<GeographicPoint> path = result.dijkstra(start, end, nodeAccepter);
+        ArrayList<GeographicPoint> points = pt.getPoints();
+        int numVisited = points.size();
         if (path == null) {
             if (corr.path == null) {
                 feedback += "PASSED.";
@@ -109,10 +113,44 @@ public class DijkstraGrader implements Runnable {
             } else {
                 feedback += "Correct size, but incorrect path.";
             }
+        } else if (((corr.visited.size()-1) != numVisited) && (corr.visited.size() != numVisited)) {
+        	feedback += "FAILED. Expected: "+corr.visited.size()+" nodes visited. Got "+numVisited+" nodes visited\n";
+        	feedback += printVisitedPoints(points,corr.visited);
+ //       } else if (!checkVisitedPoints(points,corr.visited)) {
+ //       	feedback += "FAILED. \nA mismatch was detected in nodes visited by the search.\n";
+ //       	feedback += printVisitedPoints(points,corr.visited);
         } else {
-            feedback += "PASSED.";
-            correct++;
+            feedback += "PASSED.\n";
+            feedback += "Visited correct number of nodes.\n";
+            //feedback += "Visited correct nodes in correct order.\n";
+ //       	feedback += printVisitedPoints(points,corr.visited);
+           correct++;
         }
+    }
+    
+    public boolean checkVisitedPoints(List<GeographicPoint> actual, List<GeographicPoint> expected) {
+    	for (int i = 0; i < expected.size(); i++) {
+    		if (i != actual.size()) {
+    			if (!actual.get(i).equals(expected.get(i))) return false;
+    		}
+    	}
+    	return true;
+    }
+    
+    public String printVisitedPoints(List<GeographicPoint> actual,List<GeographicPoint> expected) {
+    	String ret = "";
+    	int length = Math.max(actual.size(),expected.size());
+    	for (int i = 0; i<length; i++) {
+    		ret += String.format("%-34s ","Expected: "+((i<expected.size())?expected.get(i).printPoint():""));
+    		ret += String.format("%s","Actual: "+((i<actual.size())?actual.get(i).printPoint():""));
+    		if ((i>= actual.size()) || (i>=expected.size())) {
+    			ret += "*\n";
+    		} else {
+    			ret += (actual.get(i).equals(expected.get(i)))?"":"*";
+    			ret += "\n";
+    		}
+    	}
+    	return ret;
     }
 
     /** Print a search path in readable form */
