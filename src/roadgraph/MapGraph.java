@@ -382,7 +382,7 @@ public class MapGraph {
 		
 		for (GeographicPoint n : vertices.get(curr).getNeighborPoints()) {
              if (!visited.contains(n)) {
-                 double distToNext = distToNode.get(curr) + vertices.get(curr).getEdge(n).getRoadLength() + n.distance(goal);
+                 double distToNext = distToNode.get(curr) + vertices.get(curr).getEdge(n).getRoadLength();
                  
                  if (distToNext < distToNode.get(n)) {
                      parentMap.put(n, curr);
